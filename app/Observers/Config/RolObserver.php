@@ -22,8 +22,8 @@ class RolObserver
         Movconfig::create([
             'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
             'MOV_EVENTO' => 'Adicion Registro',
-            'MOV_CODOPE' => Auth::id(),
-            'MOV_CODALM' => auth()->user()->codalm,
+            'MOV_CODOPE' => Auth::id() ?? 1,
+            'MOV_CODALM' => auth()->user()->codalm ?? '0001',
             'MOV_DETALL' => 'Se ha Adiccionado el Rol ' . $newValues['name'],
             'MOV_CODMOD' => 'ROLES',
             'MOV_EQUIPO' => gethostname(),
@@ -56,7 +56,7 @@ class RolObserver
             Movconfig::create([
                 'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
                 'MOV_EVENTO' => $evento,
-                'MOV_CODOPE' => Auth::id(),
+                'MOV_CODOPE' => Auth::id() ?? 1,
                 'MOV_CODALM' => auth()->user()->codalm,
                 'MOV_DETALL' => 'Se ha ' . $funcion . ' el Rol ' . $newValues['name'],
                 'MOV_CODMOD' => 'ROLES',
@@ -77,7 +77,7 @@ class RolObserver
                     Movconfig::create([
                         'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
                         'MOV_EVENTO' => 'Edicion Registro',
-                        'MOV_CODOPE' => Auth::id(),
+                        'MOV_CODOPE' => Auth::id() ?? 1,
                         'MOV_CODALM' => auth()->user()->codalm,
                         'MOV_DETALL' => 'Se ha Modificado el valor ' . $oldValue . ' por ' . $newValues[$campo] . ' del Rol ' . $newValues['name'],
                         'MOV_CODMOD' => 'ROLES',

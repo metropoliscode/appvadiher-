@@ -19,8 +19,8 @@ class VentaObserver
         Movconfig::create([
             'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
             'MOV_EVENTO' => 'Adicion Registro',
-            'MOV_CODOPE' => Auth::id(),
-            'MOV_CODALM' => auth()->user()->codalm,
+            'MOV_CODOPE' => Auth::id() ?? 1,
+            'MOV_CODALM' => auth()->user()->codalm ?? '0001',
             'MOV_DETALL' => 'Se ha Adiccionado los registros de ventas de ' . date('Y-m-d'),
             'MOV_CODMOD' => 'ALMACENES',
             'MOV_EQUIPO' => gethostname(),

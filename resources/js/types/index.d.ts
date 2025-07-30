@@ -205,3 +205,11 @@ export interface Stock {
     stock:  number;
     valund: number;
 }
+
+export interface refere {
+    id: number;
+    ref_refere: string;
+    ref_nombre: string;
+    ref_codigo: string;
+    ref_undmed: string;
+}

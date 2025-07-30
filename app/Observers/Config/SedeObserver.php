@@ -22,8 +22,8 @@ class SedeObserver
         Movconfig::create([
             'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
             'MOV_EVENTO' => 'Adicion Registro',
-            'MOV_CODOPE' => Auth::id(),
-            'MOV_CODALM' => auth()->user()->codalm,
+            'MOV_CODOPE' => Auth::id() ?? 1,
+            'MOV_CODALM' => auth()->user()->codalm ?? '0001',
             'MOV_DETALL' => 'Se ha Adiccionado las Sede ' . $newValues['SED_NOMBRE'],
             'MOV_CODMOD' => 'SEDES',
             'MOV_EQUIPO' => gethostname(),

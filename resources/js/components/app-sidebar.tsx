@@ -19,11 +19,11 @@ const mainNavItems: NavItem[] = [
         href: '/comercial',
         icon: ShoppingBasket,
     },
-    {
-        title: 'Contabilidad',
-        href: '/contabilidad',
-        icon: PlayIcon,
-    },
+    // {
+    //     title: 'Contabilidad',
+    //     href: '/contabilidad',
+    //     icon: PlayIcon,
+    // },
     {
          title: 'Inventarios',
          href: '/inventarios',

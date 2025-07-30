@@ -20,6 +20,7 @@ use App\Http\Controllers\Contabilidad\CuentasController;
 use App\Http\Controllers\inventario\CompraController;
 use App\Http\Controllers\inventario\FacturaController;
 use App\Http\Controllers\inventario\StockController;
+use App\Http\Controllers\inventario\TicketController;
 use App\Http\Controllers\sistema\ClacarpetaController;
 use App\Http\Controllers\sistema\CladominioController;
 use App\Http\Controllers\sistema\ClaequipoController;
@@ -89,6 +90,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/contabilidad/cuentas',     [CuentasController::class, 'index'])->name('cuentas.index');
 
     Route::get('/inventarios/stock',        [StockController::class, 'index'])->name('stock.index');
+
+    Route::get('/inventarios/ticket',         [TicketController::class, 'index'])->name('ticket.index');
+    Route::get('/inventarios/ticket/export',  [TicketController::class, 'export'])->name('ticket.export');;
+    Route::post('/inventarios/ticket/import', [TicketController::class, 'import'])->name('ticket.import');;
+
+    Route::post('/inventarios/ticket/pdf/process', [TicketController::class, 'processPdf']);
+    Route::get('/inventarios/ticket/pdf/progress', [TicketController::class, 'pdfProgress']);
+    Route::get('/inventarios/ticket/pdf/download', [TicketController::class, 'downloadPdf']);
 
 
     Route::resource('bitacora',  MovconfigController::class);

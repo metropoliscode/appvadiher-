@@ -8,6 +8,7 @@ use App\Models\Config\Permiso;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ModuloObserver
 {
@@ -17,51 +18,60 @@ class ModuloObserver
     public function created(Modulo $modulo): void
     {
         $newValues = $modulo->getAttributes();
-        unset($newValues['created_at']);  // Eliminar `created_at` de los valores
-        unset($newValues['updated_at']);  // Eliminar `updated_at` de los valores
+        unset($newValues['created_at'], $newValues['updated_at']);
 
-        if($newValues['MOD_TIPO'] == '1'){
-            $tipo = 'Modulo';
-        }elseif($newValues['MOD_TIPO'] == '2'){
-            $tipo = 'Submodulo';
-        }else{
-            $tipo = 'Items';
-        }
+        $tipo = match($newValues['MOD_TIPO']) {
+            '1' => 'Modulo',
+            '2' => 'Submodulo',
+            default => 'Items',
+        };
 
-        $codigo = Movconfig::max('MOV_CONMOV');
+        // Registro en Movconfig
+        $codigoMov = (int) Movconfig::max('MOV_CONMOV') ?? 0;
         Movconfig::create([
-            'MOV_CONMOV' => Str::padLeft($codigo + 1, 9, '0'),
-            'MOV_EVENTO' => 'Adicion Registro',
-            'MOV_CODOPE' => Auth::id(),
-            'MOV_CODALM' => auth()->user()->codalm,
-            'MOV_DETALL' => 'Se ha Adiccionado el '. $tipo . ' ' . $newValues['MOD_NOMBRE'],
+            'MOV_CONMOV' => Str::padLeft($codigoMov + 1, 9, '0'),
+            'MOV_EVENTO' => 'Adición Registro',
+            'MOV_CODOPE' => Auth::id() ?? 1,
+            'MOV_CODALM' => auth()->user()->codalm ?? '0001',
+            'MOV_DETALL' => 'Se ha adicionado el ' . $tipo . ' ' . $newValues['MOD_NOMBRE'],
             'MOV_CODMOD' => 'MODULO',
             'MOV_EQUIPO' => gethostname(),
-            'MOV_PERIOD' => date('Y')
+            'MOV_PERIOD' => date('Y'),
         ]);
 
-        if($tipo != 'Modulo'){
-            $slug = [
+        $modul = trim($newValues['MOD_URL'], '/');
+
+        $permisos = match($newValues['MOD_TIPO']) {
+            '1' => [['name' => 'index', 'detalle' => 'Ver']],
+            default => [
                 ['name' => 'index', 'detalle' => 'Ver'],
-                ['name' =>  'store', 'detalle' => 'Crear'],
-                ['name' =>  'update', 'detalle' => 'Editar'],
-                ['name' =>  'destroy', 'detalle' => 'Eliminar']
-            ];
-            $modul = str_replace('/', '', $newValues['MOD_URL']);
-            foreach ($slug as $key => $value) {
-                $codigo = Permission::max('PER_CODIGO');
-                Permission::create([
-                    'PER_CODIGO' => Str::padLeft($codigo + 1, 3,'0'),
-                    'PER_NOMBRE' => $modul . '.' . $value['name'],
-                    'PER_DETALL' => $value['detalle'] . ' ' . $value['name'],
-                    'PER_CODMOD' => $newValues['MOD_NOMBRE'],
-                    'PER_EQUIPO' => gethostname(),
-                    'PER_CODOPE' => Auth::id(),
-                    'PER_CODUSU' => Auth::id()
-                ]);
+                ['name' => 'store', 'detalle' => 'Crear'],
+                ['name' => 'update', 'detalle' => 'Editar'],
+                ['name' => 'destroy', 'detalle' => 'Eliminar'],
+            ],
+        };
+
+        // Obtener rol administrador (ajusta según tu estructura)
+        $adminRole = Role::where('code', '001')->first(); // o ->where('ROL_CODIGO', '001')
+
+        foreach ($permisos as $permiso) {
+            $codigoPer = (int) Permission::max('code') ?? 0;
+
+            $permission = Permission::create([
+                'code' => Str::padLeft($codigoPer + 1, 3, '0'),
+                'name' => $modul . '.' . $permiso['name'],
+                'detail' => $permiso['detalle'] . ' ' . $newValues['MOD_NOMBRE'],
+                'codmod' => $newValues['MOD_NOMBRE'],
+                'equipe' => gethostname(),
+                'codope' => Auth::id() ?? 1,
+                'codusu' => Auth::id() ?? 1,
+            ]);
+
+            // Asignar permiso al rol administrador
+            if ($adminRole) {
+                $adminRole->givePermissionTo($permission);
             }
         }
-
     }
 
     /**

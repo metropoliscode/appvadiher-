@@ -11,6 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('invrefere', function (Blueprint $table) {
+            $table->id();
+            $table->string('ref_refere');
+            $table->string('ref_nombre');
+            $table->string('ref_codigo');
+            $table->string('ref_undmed');
+            $table->timestamps();
+        });
+
         Schema::create('invfactura', function (Blueprint $table) {
             $table->id();
             $table->string('fac_tipdoc');
@@ -26,6 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('invrefere');
         Schema::dropIfExists('invfactura');
     }
 };
