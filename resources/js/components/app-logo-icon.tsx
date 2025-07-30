@@ -3,6 +3,6 @@ import Logo from './../../../public/vadiher.png';
 
 export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
     return (
-        <img {...props} src={Logo} alt="" />
+        <img src={Logo} alt="logo" />
     );
 }
