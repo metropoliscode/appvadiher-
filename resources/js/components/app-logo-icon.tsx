@@ -1,8 +1,8 @@
-import { SVGAttributes } from 'react';
+import { ImgHTMLAttributes } from 'react';
 import Logo from './../../../public/vadiher.png';
 
-export default function AppLogoIcon(props: SVGAttributes<SVGElement>) {
+export default function AppLogoIcon(props: ImgHTMLAttributes<HTMLImageElement>) {
     return (
-        <img src={Logo} alt="logo" />
+        <img src={Logo} alt="logo" {...props} />
     );
 }
