@@ -94,11 +94,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventarios/ticket',         [TicketController::class, 'index'])->name('ticket.index');
     Route::get('/inventarios/ticket/export',  [TicketController::class, 'export'])->name('ticket.export');;
     Route::post('/inventarios/ticket/import', [TicketController::class, 'import'])->name('ticket.import');;
-
-    Route::post('/inventarios/ticket/pdf/process', [TicketController::class, 'processPdf']);
-    Route::get('/inventarios/ticket/pdf/progress', [TicketController::class, 'pdfProgress']);
-    Route::get('/inventarios/ticket/pdf/download', [TicketController::class, 'downloadPdf']);
-
+    Route::get('/inventarios/ticket/pdf',     [TicketController::class, 'exportPdf']);
 
     Route::resource('bitacora',  MovconfigController::class);
 

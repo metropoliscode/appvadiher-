@@ -39,53 +39,25 @@ export default function Ticket({ refere }: { refere: ReferePagination }) {
     const handlePdf = async () => {
         try {
             setLoadingPdf(true);
-            setProgressMessage('Iniciando generación del PDF...');
+            setProgressMessage('Generando todos los tickets, por favor espera...');
 
-            const token = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+            const response = await fetch("/inventarios/ticket/pdf");
+            const blob = await response.blob();
 
-            // Iniciar el proceso, pero no esperar a que termine
-            fetch("/inventarios/ticket/pdf/process", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": token ?? "",
-                    "Accept": "application/json",
-                },
-            }).catch((err) => {
-                console.error("Error al iniciar el proceso:", err);
-            });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "tickets_completo.pdf";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
 
-            // Iniciar el polling inmediatamente después
-            const interval = setInterval(async () => {
-                const progressRes = await fetch("/inventarios/ticket/pdf/progress");
-                const progressData = await progressRes.json();
-
-                setProgressMessage(
-                    `Generando tickets... ${progressData.processed} de ${progressData.total}`
-                );
-
-                if (progressData.processed >= progressData.total && progressData.total > 0) {
-                    clearInterval(interval);
-
-                    setProgressMessage('Finalizando, descargando PDF...');
-
-                    const downloadRes = await fetch("/inventarios/ticket/pdf/download");
-                    const blob = await downloadRes.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "tickets_completo.pdf";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-
-                    setProgressMessage('✅ Tickets generados correctamente.');
-                    setLoadingPdf(false);
-                }
-            }, 1000);
+            setProgressMessage('✅ Tickets generados correctamente.');
         } catch (error) {
             console.error("Error al generar el PDF", error);
             setProgressMessage('❌ Ocurrió un error al generar el PDF.');
+        } finally {
             setLoadingPdf(false);
         }
     };
@@ -119,15 +91,14 @@ export default function Ticket({ refere }: { refere: ReferePagination }) {
                 </div>
 
                 {loadingPdf ? (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="text-center">
-                            <Loader2 className="animate-spin h-6 w-6 text-cyan-700 mx-auto mb-2" />
-                            <p className="text-blue-700 font-medium">{progressMessage}</p>
+                    <div className="flex justify-center items-center h-64">
+                        <div className="flex items-center gap-2 text-blue-600 text-sm font-medium">
+                            <Loader2 className="animate-spin w-5 h-5" />
+                            Generando PDF, por favor espera...
                         </div>
                     </div>
                 ) : (
                     <>
-                        {/* Tabla */}
                         <div className="overflow-x-auto">
                             {refere.data.length > 0 ? (
                                 <table className="min-w-full border border-gray-300 text-sm">
@@ -177,6 +148,7 @@ export default function Ticket({ refere }: { refere: ReferePagination }) {
                         )}
                     </>
                 )}
+
             </div>
         </AppLayout>
     );

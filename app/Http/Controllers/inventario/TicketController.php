@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\inventario;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\GenerateTicketsPdf;
 use App\Models\inventario\Ticket;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -74,16 +73,8 @@ class TicketController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray();
 
-        // Limpiar la tabla antes de importar
-        Ticket::truncate();
-
         for ($i = 1; $i < count($rows); $i++) {
             $row = $rows[$i];
-
-            // Verificar si toda la fila está vacía
-            if (array_filter($row) === []) {
-                continue;
-            }
 
             $referencia = trim($row[0] ?? '');
 
@@ -103,47 +94,26 @@ class TicketController extends Controller
         return redirect()->back()->with('success', 'Archivo importado correctamente.');
     }
 
-
-    public function processPdf(Request $request)
+    public function exportPdf()
     {
-        cache()->forget('ticket_pdf_progress');
+        try {
+            $tickets = collect(Ticket::get());
 
-        // Inicializar progreso en caché
-        cache()->put('ticket_pdf_progress', [
-            'processed' => 0,
-            'total' => Ticket::count(),
-            'finished' => false,
-        ]);
+            $logoPath = public_path('vadiher.png');
+            $logoBase64 = file_exists($logoPath)
+                ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+                : null;
 
-        // Despachar job
-        GenerateTicketsPdf::dispatch();
+            $pdf = Pdf::loadView('pdfticket', [
+                'tickets' => $tickets,
+                'logo' => $logoBase64,
+            ])->setPaper('letter', 'portrait');
 
-        return response()->json(['message' => 'Proceso iniciado']);
-    }
-
-    public function pdfProgress()
-    {
-        $progress = cache()->get('ticket_pdf_progress', [
-            'processed' => 0,
-            'total' => Ticket::count(),
-            'finished' => false,
-        ]);
-
-        return response()->json($progress);
-    }
-
-
-    public function downloadPdf()
-    {
-        $filePath = storage_path('app/public/export/tickets_completo.pdf');
-
-        if (!file_exists($filePath)) {
-            return abort(404, 'El PDF aún no ha sido generado.');
+            return $pdf->download('tickets.pdf');
+        } catch (\Throwable $e) {
+            Log::error("PDF error: " . $e->getMessage());
+            return back()->with('error', 'Error generando el PDF.');
         }
-
-        return response()->download($filePath, 'tickets_completo.pdf');
     }
-
-
 
 }
