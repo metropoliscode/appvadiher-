@@ -65,6 +65,7 @@ class ModuloObserver
                 'equipe' => gethostname(),
                 'codope' => Auth::id() ?? 1,
                 'codusu' => Auth::id() ?? 1,
+                'guard_name' => 'web',
             ]);
 
             // Asignar permiso al rol administrador

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('SYSSEDES', function (Blueprint $table) {
+        Schema::create('syssedes', function (Blueprint $table) {
             $table->id();
             $table->string('SED_CODIGO', 100)->unique();
             $table->string('SED_NOMBRE', 100);
@@ -37,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('SYSSEDES');
+        Schema::dropIfExists('syssedes');
     }
 };

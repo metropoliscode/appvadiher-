@@ -1,73 +1,85 @@
+import { usePage, Link } from '@inertiajs/react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BoxIcon, Database, FileClock, LayoutGrid, PlayIcon, Settings, ShoppingBasket } from 'lucide-react';
+import {
+  BoxIcon,
+  Database,
+  FileClock,
+  LayoutGrid,
+  PlayIcon,
+  Settings,
+  ShoppingBasket,
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
+const iconMap: Record<string, any> = {
+    LayoutGrid: LayoutGrid,
+    ShoppingBasket: ShoppingBasket,
+    BoxIcon: BoxIcon,
+    Database: Database,
+    Settings: Settings,
+    FileClock: FileClock,
+    PlayIcon: PlayIcon,
+};
 
-
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Comercial',
-        href: '/comercial',
-        icon: ShoppingBasket,
-    },
-    // {
-    //     title: 'Contabilidad',
-    //     href: '/contabilidad',
-    //     icon: PlayIcon,
-    // },
-    {
-         title: 'Inventarios',
-         href: '/inventarios',
-         icon: BoxIcon,
-     },
-    //{
-    //     title: 'Sistemas',
-    //     href: '/sistemas',
-    //     icon: Database,
-    // },
-    // {
-    //     title: 'Configuraciones',
-    //     href: '/configuracion',
-    //     icon: Settings,
-    // },
-    // {
-    //     title: 'Bitacora',
-    //     href: '/bitacora',
-    //     icon: FileClock,
-    // }
-];
 
 export function AppSidebar() {
-    return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarHeader>
-            { route }
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
-            </SidebarContent>
+  const { props } = usePage();
+  const userRoles = (props.auth?.user?.roles || []).map((r: any) => r.name.toLowerCase());
+  const modulosPermitidos = props.modulosPermitidos || [];
 
-            <SidebarFooter>
-                <NavUser />
-            </SidebarFooter>
-        </Sidebar>
-    );
+  const isAdminOrSupervisor = userRoles.includes('administrador') || userRoles.includes('supervisor');
+
+  const dynamicNavItems: NavItem[] = [
+    ...(isAdminOrSupervisor
+      ? [{
+          title: 'Dashboard',
+          href: '/dashboard',
+          icon: LayoutGrid,
+        }]
+      : []),
+    ...modulosPermitidos.map((mod: any) => {
+        const key = mod.MOD_ICONO?.trim();
+        return {
+            title: mod.MOD_NOMBRE,
+            href: mod.MOD_URL,
+            icon: iconMap[key] || LayoutGrid, // fallback si no encuentra
+        };
+    }),
+  ];
+
+  return (
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/dashboard" prefetch>
+                <AppLogo />
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <NavMain items={dynamicNavItems} />
+      </SidebarContent>
+
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
+    </Sidebar>
+  );
 }
+

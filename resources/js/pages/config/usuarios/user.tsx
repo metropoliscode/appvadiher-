@@ -1,191 +1,178 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { Inertia } from '@inertiajs/inertia';
-import { BreadcrumbItem, User } from '@/types';
-import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
-import { Button } from '@headlessui/react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
-interface Alert {
-  type: 'success' | 'danger';
-  message: string;
-}
-
-interface UserIndexProps {
-  users: User[];
-}
+import AppLayout from "@/layouts/app-layout";
+import { Head, useForm } from "@inertiajs/react";
+import { useState } from "react";
+import { BreadcrumbItem, User, Rol } from "@/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { DeleteIcon, EditIcon, PlusIcon } from "lucide-react";
+import { router } from "@inertiajs/react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Usuarios',
-        href: '/usuarios',
-    },
+  { title: "Usuarios", href: "/usuarios" },
 ];
 
-const UserIndex: React.FC<UserIndexProps> = ({ users } : {users: User[]}) => {
-  const [showModal, setShowModal] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [userData, setUserData] = useState({
-    id: '',
-    code: '',
-    name: '',
-    email: '',
-    password: '',
+export default function Usuarios({ users, roles }: { users: User[]; roles: Rol[] }) {
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<User | null>(null);
+
+  const { data, setData, post, put, processing, reset } = useForm({
+    code: "",
+    name: "",
+    email: "",
+    password: "",
+    state: 1,
+    role_id: "",
   });
-  const [alert, setAlert] = useState<Alert | null>(null);
 
-  const handleShow = (user?: User) => {
-    if (user) {
-      setIsEdit(true);
-      setUserData(user);
-    } else {
-      setIsEdit(false);
-      setUserData({ id: '', code: '', name: '', email: '', password: '' });
-    }
-    setShowModal(true);
+  const handleCreate = () => {
+    reset();
+    setEditing(null);
+    setOpen(true);
   };
 
-  const handleClose = () => setShowModal(false);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUserData(prevData => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (isEdit) {
-      Inertia.put(`/users/${userData.id}`, userData)
-        .then(() => {
-          setAlert({ type: 'success', message: 'Usuario actualizado correctamente' });
-          setShowModal(false);
-        })
-        .catch(() => {
-          setAlert({ type: 'danger', message: 'Error al actualizar el usuario' });
-        });
-    } else {
-      Inertia.post('/users', userData)
-        .then(() => {
-          setAlert({ type: 'success', message: 'Usuario agregado correctamente' });
-          setShowModal(false);
-        })
-        .catch(() => {
-          setAlert({ type: 'danger', message: 'Error al agregar el usuario' });
-        });
-    }
+  const handleEdit = (user: User) => {
+    setEditing(user);
+    setData({
+      code: user.code || "",
+      name: user.name || "",
+      email: user.email || "",
+      password: "", // No mostrar contraseña existente
+      state: user.state,
+      role_id: user.roles?.[0]?.id?.toString() || "",
+    });
+    setOpen(true);
   };
 
   const handleDelete = (id: number) => {
-    Inertia.delete(`/users/${id}`)
-      .then(() => {
-        setAlert({ type: 'success', message: 'Usuario eliminado correctamente' });
-      })
-      .catch(() => {
-        setAlert({ type: 'danger', message: 'Error al eliminar el usuario' });
+    if (confirm("¿Estás seguro de eliminar este usuario?")) {
+      router.delete(route("usuarios.delete", id));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editing) {
+      put(route("usuarios.update", editing.id), {
+        onSuccess: () => setOpen(false),
       });
+    } else {
+      post(route("usuarios.store"), {
+        onSuccess: () => setOpen(false),
+      });
+    }
   };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-        <Head title="Almacenes" />
-        <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div className="flex justify-end">
-                <Button onClick={() => handleShow()} className="mt-4 w-full bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" tabIndex={4} >
-                    Agregar Usuario
-                </Button>
-            </div>
-             {/* Mostrar alerta */}
-            {alert && (
-                <div className={`alert alert-${alert.type} p-4 rounded mb-4`} role="alert">
-                <span className="font-semibold">{alert.message}</span>
-                <button onClick={() => setAlert(null)} className="ml-2 text-xl">×</button>
-                </div>
-            )}
-            {/* Modal para agregar/editar usuario */}
-            <div className={`modal ${showModal ? 'block' : 'hidden'}`}>
-                <div className="border-b border-gray-900/10 pb-2">
-                    <form onSubmit={handleSubmit}>
-                        <h3 className='text-center'>{isEdit ? 'Editar Usuario' : 'Agregar Usuario'}</h3>
-                        <div className="grid grid-cols-5 gap-x-2 gap-y-2 sm:grid-cols-5">
-                            <div className="sm:col-span-1">
-                                <div className="relative z-0 w-full mb-5 group">
-                                    <input value={userData.code} onChange={handleChange} type="text" name="floating_code" id="floating_code" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                                    <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Usuario</label>
-                                </div>
-                            </div>
+      <Head title="Usuarios" />
+      <div className="flex flex-col gap-4 p-4">
+        <Button onClick={handleCreate} className="w-fit">
+          <PlusIcon className="w-4 h-4 mr-2" /> Nuevo Usuario
+        </Button>
 
-                            <div className="sm:col-span-1">
-                                <div className="relative z-0 w-full mb-5 group">
-                                    <input value={userData.name} onChange={handleChange} type="text" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                                    <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Nombre</label>
-                                </div>
-                            </div>
-
-                            <div className="sm:col-span-1">
-                                <div className="relative z-0 w-full mb-5 group">
-                                    <input value={userData.email} onChange={handleChange} type="text" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                                    <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Correo</label>
-                                </div>
-                            </div>
-                            <div className="sm:col-span-1">
-                                <div className="relative z-0 w-full mb-5 group">
-                                    <input value={userData.password} onChange={handleChange} type="text" name="floating_email" id="floating_email" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " />
-                                    <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Contraseña</label>
-                                </div>
-                            </div>
-                            <div className="sm:col-span-1">
-                                <div className="inline-flex rounded-md shadow-xs items-end" role="group">
-                                <button type="submit" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-green-600 hover:text-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-green-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                                    {isEdit ? 'Actualizar' : 'Guardar'}
-                                </button>
-                                <button onClick={handleClose} type="button" className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-red-500 hover:text-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-red-500 dark:focus:ring-blue-500 dark:focus:text-white">
-                                    Cerrar
-                                </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div className="border-sidebar-border/70 dark:border-sidebar-border relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border md:min-h-min">
-                <Table>
-                    <TableHeader className="bg-amber-200 text-blue-600">
-                        <TableRow>
-                            <TableHead className="w-[100px]">#</TableHead>
-                            <TableHead className="text-center">Usuario</TableHead>
-                            <TableHead className="text-center">Nombre</TableHead>
-                            <TableHead className="text-right">Correo</TableHead>
-                            <TableHead className="text-right">Estado</TableHead>
-                            <TableHead className="text-right">Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.length ? (
-                            users.map((item, index) => (
-                            <TableRow key={item.id} onDoubleClick={() => handleShow(item)}>
-                                <TableCell className="w-[100px]">{++index}</TableCell>
-                                <TableCell className="text-center">{item.code}</TableCell>
-                                <TableCell className="text-center">{item.name}</TableCell>
-                                <TableCell className="text-right">{item.email}</TableCell>
-                                <TableCell className="text-right">{item.state}</TableCell>
-                                <TableCell className="text-right">
-                                    <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => handleDelete(item.id)} >
-                                        Eliminar
-                                    </button>
-                                </TableCell>
-                            </TableRow>
-                        ))) : (
-                            <TableRow>
-                                <TableCell colSpan={5} className="text-center">No hay Sedes Registradas</TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+        <div className="border rounded-xl overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-gray-100">
+              <TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Rol</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.length ? (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.code}</TableCell>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${user.state === 1 ? "bg-green-500" : "bg-red-500"}`} />
+                        {user.state === 1 ? "Activo" : "Inactivo"}
+                      </div>
+                    </TableCell>
+                    <TableCell>{user.roles?.[0]?.name || "Sin rol"}</TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button size="sm" variant="outline" onClick={() => handleEdit(user)}>
+                        <EditIcon className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => handleDelete(user.id)}>
+                        <DeleteIcon className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-6">
+                    No hay usuarios registrados
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-    </AppLayout>
-    );
-};
+      </div>
 
-export default UserIndex;
+      <Drawer open={open} onOpenChange={(o) => { if (!o) reset(); setOpen(o); }} direction="right">
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>{editing ? "Editar Usuario" : "Nuevo Usuario"}</DrawerTitle>
+          </DrawerHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 p-4">
+            <Input placeholder="Código" value={data.code} onChange={(e) => setData("code", e.target.value)} required />
+            <Input placeholder="Nombre" value={data.name} onChange={(e) => setData("name", e.target.value)} required />
+            <Input placeholder="Email" type="email" value={data.email} onChange={(e) => setData("email", e.target.value)} required />
+            <Input placeholder="Contraseña" type="password" value={data.password} onChange={(e) => setData("password", e.target.value)} />
+            <Select value={data.role_id} onValueChange={(value) => setData("role_id", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un rol" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((rol) => (
+                  <SelectItem key={rol.id} value={rol.id.toString()}>{rol.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data.state === 1}
+                onChange={(e) => setData("state", e.target.checked ? 1 : 0)}
+                className="accent-green-600 h-4 w-4"
+              />
+              {data.state === 1 ? "Activo" : "Inactivo"}
+            </label>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={processing}>
+                {editing ? "Actualizar" : "Guardar"}
+              </Button>
+            </div>
+          </form>
+        </DrawerContent>
+      </Drawer>
+    </AppLayout>
+  );
+}

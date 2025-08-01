@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('SYSMODULO', function (Blueprint $table) {
+        Schema::create('sysmodulo', function (Blueprint $table) {
             $table->id();
             $table->string('MOD_CODIGO', 50)->unique();
             $table->string('MOD_NOMBRE', 100)->unique();
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('SYSMODULO');
+        Schema::dropIfExists('sysmodulo');
     }
 };

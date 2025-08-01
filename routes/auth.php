@@ -22,6 +22,7 @@ use App\Http\Controllers\inventario\FacturaController;
 use App\Http\Controllers\inventario\StockController;
 use App\Http\Controllers\inventario\TicketController;
 use App\Http\Controllers\sistema\ClacarpetaController;
+use App\Http\Controllers\sistema\ClacorreoController;
 use App\Http\Controllers\sistema\CladominioController;
 use App\Http\Controllers\sistema\ClaequipoController;
 use App\Http\Controllers\sistema\EquipoController;
@@ -95,6 +96,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventarios/ticket/export',  [TicketController::class, 'export'])->name('ticket.export');;
     Route::post('/inventarios/ticket/import', [TicketController::class, 'import'])->name('ticket.import');;
     Route::get('/inventarios/ticket/pdf',     [TicketController::class, 'exportPdf']);
+
+    Route::resource('clacorreo',    ClacorreoController::class);
+    Route::resource('cladominios',  CladominioController::class);
+    Route::resource('claequipos',   ClaequipoController::class);
+    Route::resource('equipos',      EquipoController::class);
+
+    Route::resource('almacenes',    AlmacenController::class);
+    Route::resource('sedes',        SedeController::class);
+    Route::resource('areas',        AreaController::class);
+    Route::resource('modulos',      ModuloController::class);
+    Route::resource('roles',        RolController::class);
+    Route::post('roles/{role}/permisos', [RolController::class, 'permisos'])->name('roles.permisos');
+
+    Route::resource('usuarios',     UserController::class);
+
 
     Route::resource('bitacora',  MovconfigController::class);
 

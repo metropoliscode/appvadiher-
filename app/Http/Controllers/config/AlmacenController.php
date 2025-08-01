@@ -39,61 +39,31 @@ class AlmacenController extends Controller
             'ALM_NIT'    => 'nullable|string|max:255',
         ]);
 
-        $almacen = new Almacen();
-        $almacen->ALM_CODIGO = $request->ALM_CODIGO;
-        $almacen->ALM_NOMBRE = $request->ALM_NOMBRE;
-        $almacen->ALM_DETALL = $request->ALM_DETALL;
-        $almacen->ALM_NIT    = $request->ALM_NIT;
-        $almacen->ALM_EQUIPO = gethostname();
-        $almacen->ALM_CODOPE = auth()->user()->id;
-        $almacen->ALM_CODUSU = auth()->user()->id;
-        $almacen->save();
+        $data['ALM_EQUIPO'] = gethostname();
+        $data['ALM_CODOPE'] = auth()->id();
+        $data['ALM_CODUSU'] = auth()->id();
 
-        return redirect()->route('almacenes.index')->with('success', 'Almacen creado con exito' );
+        Almacen::create($data);
 
+        return redirect()->back()->with('success', 'Almacen creado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, Almacen $Almacen)
     {
-
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        return Inertia::render('config/almacenes/almacen-edit', [
-            $almacen = Almacen::findOrFail($id),
-            'almacen' => $almacen,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
+       $request->validate([
             'ALM_CODIGO' => 'required|string|max:255',
             'ALM_NOMBRE' => 'required|string|max:255',
             'ALM_DETALL' => 'nullable|string|max:255',
             'ALM_NIT'    => 'nullable|string|max:255',
         ]);
-        $almacen = Almacen::find($id);
-        $almacen->ALM_CODIGO = $request->ALM_CODIGO;
-        $almacen->ALM_NOMBRE = $request->ALM_NOMBRE;
-        $almacen->ALM_DETALL = $request->ALM_DETALL;
-        $almacen->ALM_NIT    = $request->ALM_NIT;
-        $almacen->ALM_ESTADO = $request->ALM_ESTADO;
-        $almacen->ALM_EQUIPO = gethostname();
-        $almacen->ALM_CODUSU = auth()->user()->id;
-        $almacen->save();
 
-        return redirect()->route('almacenes.index')->with('success', 'Almacen actualizado con exito');
+        $data['ALM_EQUIPO'] = gethostname();
+        $data['ALM_CODOPE'] = auth()->id();
+        $data['ALM_CODUSU'] = auth()->id();
+
+        Almacen::update($data);
+
+        return redirect()->back()->with('success', 'Almacen Actualizado correctamente.');
     }
 
     /**

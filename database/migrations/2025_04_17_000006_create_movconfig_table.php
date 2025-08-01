@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('MOVCONFIG', function (Blueprint $table) {
+        Schema::create('movconfig', function (Blueprint $table) {
             $table->id();
             $table->string('MOV_CONMOV')->unique();
             $table->string('MOV_EVENTO');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('MOVCONFIG');
+        Schema::dropIfExists('movconfig');
     }
 };

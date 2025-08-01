@@ -43,7 +43,7 @@ export interface Almacen {
     ALM_DETALL: string;
     ALM_NIT:    string;
     ALM_EQUIPO: string;
-    ALM_ESTADO: string;
+    ALM_ESTADO: 1 | 0;
     ALM_DELETE: string;
     ALM_CODOPE: string;
     ALM_CODUSU: string;
@@ -65,8 +65,8 @@ export interface Sede {
     SED_CODSUB: string;
     SED_CODALM: string;
     SED_EQUIPO: string;
-    SED_ESTADO: string;
-    SED_DELETE: string;
+    SED_ESTADO: 1 | 0;
+    SED_DELETE: 1 | 0;
     SED_CODOPE: string;
     SED_CODUSU: string;
     created_at: string;
@@ -80,8 +80,8 @@ export interface Area {
     ARE_NOMBRE: string;
     ARE_DETALL: string;
     ARE_EQUIPO: string;
-    ARE_ESTADO: string;
-    ARE_DELETE: string;
+    ARE_ESTADO: 1 | 0;
+    ARE_DELETE: 1 | 0;
     ARE_CODOPE: string;
     ARE_CODUSU: string;
     created_at: string;
@@ -102,6 +102,15 @@ export interface Rol {
     updated_at: string;
 }
 
+export interface Permission {
+    id: number;
+    code: string;
+    name: string;
+    detail: string;
+    codope: string;
+    codusu: string;
+}
+
 export interface Modulo{
     id: number;
     MOD_CODIGO: string;
@@ -110,6 +119,7 @@ export interface Modulo{
     MOD_URL:    string;
     MOD_ICONO:  string;
     MOD_PARENT: string;
+    MOD_ESTADO: 0 | 1;
     created_at: string;
     updated_at: string;
     [key: string]: unknown;
@@ -121,11 +131,20 @@ export interface User {
     name: string;
     email: string;
     password: string;
-    state: string;
+    state: 1 | 0;
+    roles: Roles[];
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Roles{
+    id: number;
+    name: string;
+    detail: string;
+    codope: string;
+    codusu: string;
 }
 
 export interface Factura {
@@ -212,4 +231,46 @@ export interface refere {
     ref_nombre: string;
     ref_codigo: string;
     ref_undmed: string;
+}
+
+export interface Cladis {
+    id: number;
+    cla_nombre: string;
+    cla_usuari: string;
+    cla_clave: string;
+    cla_nomwif: string;
+    cla_clawif: string;
+    cla_ip: string;
+    cla_patron: string;
+    cla_serial: string;
+}
+
+export interface Clacor {
+    id: number;
+    cla_correo: string;
+    cla_clave: string;
+}
+
+export interface Clacre {
+    id: number;
+    cla_domnom: string;
+    cla_domurl: string;
+    cla_donusu: string;
+    cla_domcla: string;
+}
+
+export interface Equipo {
+    id: number;
+    equ_nombre: string;
+    equ_marca: string
+    equ_modelo: string;
+    equ_serial: string;
+    equ_ramtip: string;
+    equ_ramcap: string;
+    equ_hddtip: string;
+    equ_hddcap: string;
+    equ_progen: string;
+    equ_prodet: string;
+    equ_grafic: string;
+    equ_dirmac: string;
 }

@@ -5,70 +5,73 @@ namespace App\Http\Controllers\config;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RolController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return Inertia::render('config/roles/rol',[
-            'roles' => Role::all()
+        $permissions = Permission::all();
+
+        return Inertia::render('config/roles/rol', [
+            'roles' => Role::with('permissions')->get(),
+            'permisos' => $permissions,
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return Inertia::render('config/roles/rol-create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $rol = Role::findOrFail($id);
-        $permissions = $rol->permissions->pluck('name', 'detail', 'codmod');
-
-        return Inertia::render('config/roles/rol-edit', [
-            'rol' => $rol,
+        $request->validate([
+            'code'   => 'required|string|unique:roles,code',
+            'name'   => 'required|string|max:255',
+            'detail' => 'nullable|string|max:255',
         ]);
+
+        Role::create([
+            'code'   => $request->code,
+            'name'   => $request->name,
+            'guard_name' => 'web', // requerido por Spatie
+            'detail' => $request->detail,
+        ]);
+
+        return redirect()->back()->with('success', 'Rol creado correctamente.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $code)
     {
-        //
+        $request->validate([
+            'name'   => 'required|string|max:255',
+            'detail' => 'nullable|string|max:255',
+        ]);
+
+        $role = Role::where('code', $code)->firstOrFail();
+        $role->update([
+            'name'   => $request->name,
+            'detail' => $request->detail,
+        ]);
+
+        return redirect()->back()->with('success', 'Rol actualizado correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $code)
     {
-        //
+        $role = Role::where('code', $code)->firstOrFail();
+        $role->delete();
+
+        return redirect()->back()->with('success', 'Rol eliminado correctamente.');
+    }
+
+    public function permisos(Request $request, string $code)
+    {
+        $request->validate([
+            'permisos' => 'array',
+            'permisos.*' => 'string|exists:permissions,name',
+        ]);
+
+        $role = Role::where('code', $code)->firstOrFail();
+        $role->syncPermissions($request->permisos);
+
+        return redirect()->back()->with('success', 'Permisos asignados correctamente.');
     }
 }

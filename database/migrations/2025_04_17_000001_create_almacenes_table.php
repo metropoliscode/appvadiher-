@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('SYSALMACE', function (Blueprint $table) {
+        Schema::create('sysalmace', function (Blueprint $table) {
             $table->id();
             $table->string('ALM_CODIGO', 100)->unique();
             $table->string('ALM_NOMBRE', 100);
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('SYSALMACE');
+        Schema::dropIfExists('sysalmace');
     }
 };

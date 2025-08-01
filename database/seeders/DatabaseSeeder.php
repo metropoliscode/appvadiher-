@@ -20,6 +20,39 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $admin = Role::create([
+            'code' => '001',
+            'name' => 'Administrador',
+            'detail' => 'Rol Administrador',
+            'codope' => '1',
+            'codusu' => '1',
+            'equipe' => 'MT-SISTEMAS',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $super = Role::create([
+            'code' => '002',
+            'name'   => 'Supervisor',
+            'detail' => 'Rol Supervisor',
+            'codope' => '1',
+            'codusu' => '1',
+            'equipe' => 'MT-SISTEMAS',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $user = Role::create([
+            'code' => '003',
+            'name'   => 'Usuario',
+            'detail' => 'Rol Usuario',
+            'codope' => '1',
+            'codusu' => '1',
+            'equipe' => 'MT-SISTEMAS',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         User::withoutEvents(function () {
             User::factory()->create([
                 'code'    => 'ADMIN',
@@ -29,14 +62,54 @@ class DatabaseSeeder extends Seeder
                 'codope'    => '1',
                 'codusu'    => '1',
                 'codalm'    => '1',
+                'host'      => 'MT-SISTEMAS',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            User::factory()->create([
+                'code'    => 'JORGES',
+                'name'    => 'JORGE SMITH',
+                'email'   => 'usuario1@app.com',
+                'password' => Hash::make('App123'),
+                'codope'  => '1',
+                'codusu'  => '1',
+                'codalm'  => '1',
                 'host'    => 'MT-SISTEMAS',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+
             User::factory()->create([
-                'code'    => 'APP',
-                'name'    => 'Usuario de Aplicación',
-                'email'   => 'usuario@app.com',
+                'code'    => 'DISLAYC',
+                'name'    => 'DISLAY CASAS',
+                'email'   => 'usuario2@app.com',
+                'password' => Hash::make('App123'),
+                'codope'  => '1',
+                'codusu'  => '1',
+                'codalm'  => '1',
+                'host'    => 'MT-SISTEMAS',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            User::factory()->create([
+                'code'    => 'ANAO',
+                'name'    => 'ANA OCHOA',
+                'email'   => 'usuario3@app.com',
+                'password' => Hash::make('App123'),
+                'codope'  => '1',
+                'codusu'  => '1',
+                'codalm'  => '1',
+                'host'    => 'MT-SISTEMAS',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            User::factory()->create([
+                'code'    => 'KARENG',
+                'name'    => 'KAREN GONZALEZ',
+                'email'   => 'usuario4@app.com',
                 'password' => Hash::make('App123'),
                 'codope'  => '1',
                 'codusu'  => '1',
@@ -46,6 +119,17 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         });
+
+        $adminUser = User::where('code', 'ADMIN')->first();
+        $appUser   = User::where('code', 'KARENG')->first();
+        $super     = User::whereIn('id', [2, 3, 4])->get();
+
+        $adminUser?->assignRole('Administrador');
+        $appUser?->assignRole('Usuario');
+
+        foreach ($super as $usuario) {
+            $usuario->assignRole('Supervisor');
+        }
 
         $modulos = [
             [
@@ -85,7 +169,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/home',
                 'MOD_TIPO'  =>  '1',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -127,7 +211,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/home',
                 'MOD_TIPO'   => '1',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -141,7 +225,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'  =>  '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -155,7 +239,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'  =>  '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -169,7 +253,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'  =>  '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -183,7 +267,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'  =>  '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -197,7 +281,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'   =>  '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -211,7 +295,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/configuracion',
                 'MOD_TIPO'   => '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -281,7 +365,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/sistemas',
                 'MOD_TIPO'   => '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -309,7 +393,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/sistemas',
                 'MOD_TIPO'   => '2',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -323,7 +407,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/contrasenas',
                 'MOD_TIPO'   => '3',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -337,7 +421,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/contrasenas',
                 'MOD_TIPO'   => '3',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -351,7 +435,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/contrasenas',
                 'MOD_TIPO'   => '3',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -365,7 +449,7 @@ class DatabaseSeeder extends Seeder
                 'MOD_PARENT' => '/contrasenas',
                 'MOD_TIPO'   => '3',
                 'MOD_EQUIPO' => 'MT-SISTEMAS',
-                'MOD_ESTADO' => '0',
+                'MOD_ESTADO' => '1',
                 'MOD_CODOPE' => '1',
                 'MOD_CODUSU' => '1',
                 'created_at' => now(),
@@ -559,36 +643,7 @@ class DatabaseSeeder extends Seeder
             $newmodulo = Modulo::create($modulo);
         }
 
-            $admin = Role::create([
-                'code' => '001',
-                'name' => 'Administrador',
-                'detail' => 'Rol Administrador',
-                'codope' => '1',
-                'codusu' => '1',
-                'equipe' => 'MT-SISTEMAS',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $super = Role::create([
-                'code' => '002',
-                'name'   => 'Supervisor',
-                'detail' => 'Rol Supervisor',
-                'codope' => '1',
-                'codusu' => '1',
-                'equipe' => 'MT-SISTEMAS',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-            $user = Role::create([
-                'code' => '003',
-                'name'   => 'Usuario',
-                'detail' => 'Rol Usuario',
-                'codope' => '1',
-                'codusu' => '1',
-                'equipe' => 'MT-SISTEMAS',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+
         //CONFIG
         Almacen::withoutEvents(function() {
             DB::table('SYSALMACE')->insert([

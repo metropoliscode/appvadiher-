@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -17,34 +18,40 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('config/usuarios/user', [
-            'users' => User::all(),
+            'users' => User::with('roles')->get(),
+            'roles' => Role::all(),
         ]);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
             'code' => 'required|string|max:10',
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed'],
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         $user = User::create([
-            'code'      => $request->code,
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'codope'    => Auth::id(),
-            'codusu'    => Auth::id(),
-            'host'      => gethostname()
+            'code'     => $request->code,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'codope'   => Auth::id(),
+            'codusu'   => Auth::id(),
+            'host'     => gethostname(),
         ]);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Usuario Creado correctamente'
-        ], 201);
+        $user->syncRoles([$request->role_id]);
 
+        return response()->json([
+            'status'  => true,
+            'message' => 'Usuario creado correctamente'
+        ], 201);
     }
 
     /**
@@ -53,22 +60,27 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         $user = User::findOrFail($id);
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'code'   => 'required|string|max:10',
+            'name'   => 'required|string|max:255',
+            'email'  => 'required|string|email|max:255|unique:users,email,' . $id,
+            'role_id' => 'required|exists:roles,id',
         ]);
 
         $user->update([
-            'code' => $request->code,
-            'name' => $request->name,
-            'email' => $request->email,
-            'codusu'    => Auth::id(),
-            'host'      => gethostname()
+            'code'    => $request->code,
+            'name'    => $request->name,
+            'email'   => $request->email,
+            'codusu'  => Auth::id(),
+            'host'    => gethostname(),
         ]);
 
+        $user->syncRoles([$request->role_id]);
+
         return response()->json([
-            'status' => true,
-            'message' => 'Usuario Actualizado correctamente'
+            'status'  => true,
+            'message' => 'Usuario actualizado correctamente'
         ], 201);
     }
 
@@ -78,16 +90,18 @@ class UserController extends Controller
     public function destroy(Request $request, string $id)
     {
         $user = User::find($id);
-        if($request->fisico == 0){
+
+        if ($request->fisico == 0) {
             $user->estado = 1;
             $user->delete = 1;
             $user->save();
-        }else{
+        } else {
             $user->delete();
         }
+
         return response()->json([
-            'status' => true,
-            'message' => 'Usuario Eliminado'
+            'status'  => true,
+            'message' => 'Usuario eliminado'
         ], 201);
     }
 }
